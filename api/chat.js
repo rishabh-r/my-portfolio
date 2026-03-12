@@ -104,7 +104,7 @@ export default async function handler(req, res) {
 
   try {
     const completion = await client.chat.completions.create({
-      model: 'gpt-5-mini',
+      model: 'gpt-4.1-mini',
       messages: [
         { role: 'system', content: systemContent },
         ...messages.slice(-10),
