@@ -448,7 +448,7 @@ export default function Chatbot() {
                                                     'Tap the orb to start talking'}
                       </div>
 
-                      {/* ── 3D AI Orb ── */}
+                      {/* ── Music Visualizer Mic ── */}
                       <button
                         className={`ai-orb ai-orb--${orbState}`}
                         onClick={toggleConversation}
@@ -456,45 +456,23 @@ export default function Chatbot() {
                         aria-label={conversationActive ? 'Stop conversation' : 'Start conversation'}
                         title={conversationActive ? 'Tap to stop' : 'Tap to start talking'}
                       >
-                        {/* Outer glow */}
                         <div className="ai-orb-glow" />
-
-                        {/* Rotating rings */}
-                        <div className="ai-orb-ring ai-orb-ring--1" />
-                        <div className="ai-orb-ring ai-orb-ring--2" />
-
-                        {/* Sphere */}
-                        <div className="ai-orb-sphere">
-                          {/* 3D highlight */}
-                          <div className="ai-orb-highlight" />
-
-                          {/* Equalizer bars — listening */}
-                          {listening && (
-                            <div className="ai-orb-bars">
-                              {[...Array(5)].map((_, i) => (
-                                <span key={i} className="ai-orb-bar" style={{ animationDelay: `${i * 0.1}s` }} />
+                        <div className="ai-orb-body">
+                          {voiceLoading ? (
+                            <span className="ai-orb-spinner" />
+                          ) : (
+                            <div className="ai-orb-eq">
+                              {[...Array(7)].map((_, i) => (
+                                <span key={i} className="ai-orb-eq-bar" />
                               ))}
                             </div>
                           )}
-
-                          {/* Wave rings — speaking */}
-                          {isSpeaking && (
-                            <div className="ai-orb-waves">
-                              {[...Array(3)].map((_, i) => (
-                                <span key={i} className="ai-orb-wave-ring" style={{ animationDelay: `${i * 0.5}s` }} />
-                              ))}
-                            </div>
-                          )}
-
-                          {/* Loading spinner */}
-                          {voiceLoading && <span className="ai-orb-spinner" />}
-
-                          {/* Idle / active icon */}
-                          {!listening && !isSpeaking && !voiceLoading && (
-                            <span className="ai-orb-icon">
-                              {conversationActive ? '●' : '▶'}
-                            </span>
-                          )}
+                          <span className="ai-orb-label">
+                            {orbState === 'listening' ? 'listening' :
+                             orbState === 'speaking'  ? 'speaking'  :
+                             orbState === 'loading'   ? 'thinking'  :
+                             orbState === 'active'    ? 'ready'     : 'tap to talk'}
+                          </span>
                         </div>
                       </button>
 
