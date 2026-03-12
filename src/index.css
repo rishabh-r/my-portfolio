@@ -1317,6 +1317,233 @@ body {
 }
 
 /* ──────────────────────────────────────────────────
+   3D AI ORB
+────────────────────────────────────────────────── */
+.ai-orb {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin: 12px 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.ai-orb:disabled { cursor: not-allowed; opacity: 0.7; }
+
+/* Outer glow blob */
+.ai-orb-glow {
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,92,246,0.35) 0%, transparent 70%);
+  animation: orbGlow 3s ease-in-out infinite;
+  pointer-events: none;
+}
+.ai-orb--listening .ai-orb-glow  { background: radial-gradient(circle, rgba(239,68,68,0.4)  0%, transparent 70%); animation-duration: 0.8s; }
+.ai-orb--speaking  .ai-orb-glow  { background: radial-gradient(circle, rgba(0,201,167,0.4)   0%, transparent 70%); animation-duration: 0.6s; }
+.ai-orb--loading   .ai-orb-glow  { background: radial-gradient(circle, rgba(251,191,36,0.35) 0%, transparent 70%); animation-duration: 1s;   }
+.ai-orb--active    .ai-orb-glow  { background: radial-gradient(circle, rgba(139,92,246,0.45) 0%, transparent 70%); animation-duration: 2s;   }
+
+/* Rotating orbital rings */
+.ai-orb-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(139,92,246,0.25);
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+}
+.ai-orb-ring--1 { width: 115%; height: 115%; animation: orbRing 5s linear infinite; }
+.ai-orb-ring--2 { width: 130%; height: 130%; animation: orbRing 8s linear infinite reverse; }
+.ai-orb--listening .ai-orb-ring { border-color: rgba(239,68,68,0.35); }
+.ai-orb--speaking  .ai-orb-ring { border-color: rgba(0,201,167,0.35); }
+.ai-orb--loading   .ai-orb-ring { border-color: rgba(251,191,36,0.3); }
+
+/* 3D sphere */
+.ai-orb-sphere {
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #c4b5fd 0%, #7c3aed 40%, #1e1b4b 100%);
+  box-shadow:
+    0 0 28px rgba(139,92,246,0.55),
+    inset 0 -6px 14px rgba(0,0,0,0.35),
+    inset 0 4px 8px rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.4s, box-shadow 0.4s;
+  overflow: hidden;
+}
+.ai-orb--listening .ai-orb-sphere {
+  background: radial-gradient(circle at 35% 30%, #fca5a5 0%, #ef4444 40%, #7f1d1d 100%);
+  box-shadow: 0 0 32px rgba(239,68,68,0.6), inset 0 -6px 14px rgba(0,0,0,0.35);
+}
+.ai-orb--speaking .ai-orb-sphere {
+  background: radial-gradient(circle at 35% 30%, #6ee7b7 0%, #059669 40%, #064e3b 100%);
+  box-shadow: 0 0 32px rgba(0,201,167,0.6), inset 0 -6px 14px rgba(0,0,0,0.35);
+}
+.ai-orb--loading .ai-orb-sphere {
+  background: radial-gradient(circle at 35% 30%, #fde68a 0%, #d97706 40%, #451a03 100%);
+  box-shadow: 0 0 28px rgba(251,191,36,0.5), inset 0 -6px 14px rgba(0,0,0,0.35);
+}
+
+/* Specular highlight for 3D feel */
+.ai-orb-highlight {
+  position: absolute;
+  top: 14%; left: 18%;
+  width: 32%; height: 22%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.45) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Equalizer bars — shown when listening */
+.ai-orb-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 36px;
+}
+.ai-orb-bar {
+  width: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.9);
+  animation: barBounce 0.55s ease-in-out infinite alternate;
+  min-height: 6px;
+}
+.ai-orb-bar:nth-child(1) { height: 10px; }
+.ai-orb-bar:nth-child(2) { height: 20px; }
+.ai-orb-bar:nth-child(3) { height: 28px; }
+.ai-orb-bar:nth-child(4) { height: 20px; }
+.ai-orb-bar:nth-child(5) { height: 10px; }
+
+/* Expanding wave rings — shown when speaking */
+.ai-orb-waves {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ai-orb-wave-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.55);
+  animation: waveExpand 1.5s ease-out infinite;
+}
+
+/* Loading spinner */
+.ai-orb-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: chatbotSpin 0.8s linear infinite;
+}
+
+/* Centre icon (idle / active) */
+.ai-orb-icon {
+  color: rgba(255,255,255,0.92);
+  font-size: 1.6rem;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+/* Stop hint */
+.ai-orb-stop-hint {
+  font-size: 0.72rem;
+  color: var(--text2);
+  opacity: 0.7;
+  margin: 0 0 6px;
+}
+
+/* Live transcript pill */
+.chatbot-voice-current {
+  width: 100%;
+  background: rgba(108,99,255,0.08);
+  border: 1px solid rgba(108,99,255,0.18);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-style: italic;
+  line-height: 1.5;
+}
+.chatbot-voice-current-label {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 0.68rem;
+  color: var(--purple);
+  display: block;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Voice conversation history */
+.chatbot-voice-history {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 180px;
+  padding-right: 2px;
+}
+.chatbot-voice-item {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.chatbot-voice-item--user {
+  background: rgba(108,99,255,0.07);
+  border: 1px solid rgba(108,99,255,0.14);
+}
+.chatbot-voice-item--assistant {
+  background: rgba(0,201,167,0.07);
+  border: 1px solid rgba(0,201,167,0.16);
+}
+.chatbot-voice-item-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 3px;
+  opacity: 0.7;
+}
+.chatbot-voice-item--user      .chatbot-voice-item-label { color: var(--purple); }
+.chatbot-voice-item--assistant .chatbot-voice-item-label { color: var(--teal); }
+
+/* ── Orb keyframes ── */
+@keyframes orbGlow {
+  0%, 100% { transform: scale(1);    opacity: 0.7; }
+  50%       { transform: scale(1.18); opacity: 1;   }
+}
+@keyframes orbRing {
+  from { transform: translate(-50%,-50%) rotate(0deg); }
+  to   { transform: translate(-50%,-50%) rotate(360deg); }
+}
+@keyframes barBounce {
+  from { transform: scaleY(0.35); }
+  to   { transform: scaleY(1);    }
+}
+@keyframes waveExpand {
+  0%   { width: 16px; height: 16px; opacity: 0.8; }
+  100% { width: 80px; height: 80px; opacity: 0;   }
+}
+
+/* ──────────────────────────────────────────────────
    CHATBOT — RESPONSIVE
 ────────────────────────────────────────────────── */
 @media (max-width: 768px) {
