@@ -1,5 +1,5 @@
-// api/chat.js — Vercel Serverless Function (CommonJS)
-const OpenAI = require('openai')
+// api/chat.js — Vercel Serverless Function (ES Module)
+import OpenAI from 'openai'
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
@@ -62,7 +62,7 @@ INSTRUCTIONS:
 - Do not make up or assume information not listed above
 - If a recruiter asks if Rishabh is available or open to opportunities, say he is open to exciting AI/ML roles`
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
