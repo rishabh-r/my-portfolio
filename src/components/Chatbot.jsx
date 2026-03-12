@@ -47,37 +47,49 @@ function parseBold(text) {
   )
 }
 
-// ─── Strip markdown for TTS (removes **, *, -, # etc.) ───────────────────
+// ─── Strip markdown for TTS ───────────────────────────────────────────────
 function stripMarkdown(text) {
   return text
-    .replace(/\*\*(.*?)\*\*/g, '$1')   // bold
-    .replace(/\*(.*?)\*/g, '$1')        // italic
-    .replace(/^[-*]\s+/gm, '')          // bullet points
-    .replace(/^#+\s+/gm, '')            // headings
-    .replace(/`(.*?)`/g, '$1')          // inline code
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/^[-*]\s+/gm, '')
+    .replace(/^#+\s+/gm, '')
+    .replace(/`(.*?)`/g, '$1')
     .trim()
 }
 
-// ─── Speak — Indian female voice + onEnd callback ─────────────────────────
-function speak(text, onEnd) {
+// ─── Detect language from transcript ─────────────────────────────────────
+function detectLang(text) {
+  const hindiChars = (text.match(/[\u0900-\u097F]/g) || []).length
+  return hindiChars > 1 ? 'hi' : 'en'
+}
+
+// ─── Speak — bilingual (en/hi), Indian female voice ──────────────────────
+function speak(text, lang = 'en', onEnd) {
   if (!speechSynthesisAvailable) { onEnd?.(); return }
   window.speechSynthesis.cancel()
-  const utter = new SpeechSynthesisUtterance(text)
-  utter.rate  = 1.0
-  utter.pitch = 1.15
-  utter.lang  = 'en-IN'
-  utter.onend   = () => onEnd?.()
-  utter.onerror = () => onEnd?.()
+  const utter        = new SpeechSynthesisUtterance(text)
+  utter.rate         = 1.0
+  utter.pitch        = 1.1
+  utter.lang         = lang === 'hi' ? 'hi-IN' : 'en-IN'
+  utter.onend        = () => onEnd?.()
+  utter.onerror      = () => onEnd?.()
 
   const trySpeak = () => {
     const voices = window.speechSynthesis.getVoices()
-    const preferred =
-      voices.find(v => v.name.includes('Raveena'))                          ||
-      voices.find(v => v.lang === 'en-IN' && /female/i.test(v.name))       ||
-      voices.find(v => v.lang === 'en-IN')                                  ||
-      voices.find(v => /india/i.test(v.name))                               ||
-      voices.find(v => v.name.includes('Google') && /female/i.test(v.name))||
-      voices.find(v => v.name.includes('Samantha') || v.name.includes('Karen'))
+    let preferred
+    if (lang === 'hi') {
+      preferred =
+        voices.find(v => v.lang === 'hi-IN' && /female/i.test(v.name)) ||
+        voices.find(v => v.lang === 'hi-IN')                            ||
+        voices.find(v => v.lang.startsWith('hi'))
+    } else {
+      preferred =
+        voices.find(v => v.name.includes('Raveena'))                           ||
+        voices.find(v => v.lang === 'en-IN' && /female/i.test(v.name))        ||
+        voices.find(v => v.lang === 'en-IN')                                   ||
+        voices.find(v => /india/i.test(v.name))
+    }
     if (preferred) utter.voice = preferred
     window.speechSynthesis.speak(utter)
   }
@@ -129,7 +141,9 @@ export default function Chatbot() {
   const recognitionRef        = useRef(null)
   const transcriptRef         = useRef('')
   const conversationActiveRef = useRef(false)
-  const isListeningRef        = useRef(false)   // true while recognition is active
+  const isListeningRef        = useRef(false)
+  const langRef               = useRef('en')    // 'en' | 'hi'
+  const phaseRef              = useRef('greeting') // 'greeting' | 'chat'
   const startListeningRef     = useRef(null)
 
   // Auto-scroll chat
@@ -167,17 +181,17 @@ export default function Chatbot() {
     }
   }, [])
 
-  // ── Continuous listening engine ─────────────────────────────────────────
+  // ── Bilingual continuous listening engine ────────────────────────────────
   useEffect(() => {
     function startListening() {
       if (!SpeechRecognitionAPI || !conversationActiveRef.current) return
-      // Don't double-start
       if (isListeningRef.current) return
 
-      const recognition = new SpeechRecognitionAPI()
+      const recognition          = new SpeechRecognitionAPI()
       recognition.continuous     = false
       recognition.interimResults = true
-      recognition.lang           = 'en-IN'
+      // hi-IN handles both Hindi & English well in Chrome (2025)
+      recognition.lang           = langRef.current === 'hi' ? 'hi-IN' : 'en-IN'
 
       recognition.onstart = () => {
         isListeningRef.current = true
@@ -187,12 +201,11 @@ export default function Chatbot() {
       }
 
       recognition.onresult = (event) => {
-        // ── BARGE-IN: user started talking, cancel AI speech immediately ──
+        // BARGE-IN: cancel AI speech the moment user starts talking
         if (window.speechSynthesis.speaking) {
           window.speechSynthesis.cancel()
           setIsSpeaking(false)
         }
-
         let interim = '', final = ''
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const t = event.results[i][0].transcript
@@ -209,8 +222,35 @@ export default function Chatbot() {
         setListening(false)
         const spoken = transcriptRef.current.trim()
         if (!spoken || !conversationActiveRef.current) return
-
         setCurrentTranscript('')
+
+        // ── GREETING PHASE: parse language preference ─────────────────────
+        if (phaseRef.current === 'greeting') {
+          const wantsHindi =
+            /hindi|हिंदी|हिन्दी/i.test(spoken) ||
+            detectLang(spoken) === 'hi'
+          const chosen = wantsHindi ? 'hi' : 'en'
+          langRef.current = chosen
+          phaseRef.current = 'chat'
+
+          const ack = chosen === 'hi'
+            ? 'बढ़िया! चलिए Hindi में बात करते हैं। Rishabh के बारे में कुछ भी पूछें!'
+            : "Great! Let's talk in English. Ask me anything about Rishabh!"
+
+          setIsSpeaking(true)
+          speak(ack, chosen, () => {
+            setIsSpeaking(false)
+            if (conversationActiveRef.current && !isListeningRef.current) startListening()
+          })
+          return
+        }
+
+        // ── CHAT PHASE: auto-detect language per sentence ─────────────────
+        const hindiChars = (spoken.match(/[\u0900-\u097F]/g) || []).length
+        if (hindiChars > 2)                          langRef.current = 'hi'
+        else if (hindiChars === 0 && spoken.length > 3) langRef.current = 'en'
+        const activeLang = langRef.current
+
         setVoiceHistory(prev => [...prev, { type: 'user', text: spoken }])
         setVoiceLoading(true)
 
@@ -218,7 +258,11 @@ export default function Chatbot() {
           const res = await fetch('/api/chat', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: [{ role: 'user', content: spoken }], voice: true }),
+            body: JSON.stringify({
+              messages: [{ role: 'user', content: spoken }],
+              voice: true,
+              lang: activeLang,
+            }),
           })
           const data = await res.json()
           if (!res.ok) throw new Error(data.error)
@@ -226,20 +270,19 @@ export default function Chatbot() {
           setVoiceHistory(prev => [...prev, { type: 'assistant', text: data.reply }])
           setVoiceLoading(false)
           setIsSpeaking(true)
+          startListening()   // barge-in ready while AI speaks
 
-          // Start listening for barge-in WHILE AI is speaking
-          startListening()
-
-          speak(stripMarkdown(data.reply), () => {
+          speak(stripMarkdown(data.reply), activeLang, () => {
             setIsSpeaking(false)
-            // Only restart if not already listening (wasn't interrupted)
             if (conversationActiveRef.current && !isListeningRef.current) startListening()
           })
         } catch {
-          const err = "Sorry, I couldn't process that. Please try again."
+          const err = activeLang === 'hi'
+            ? 'माफ़ करें, कुछ गड़बड़ी हो गई। कृपया फिर से कोशिश करें।'
+            : "Sorry, I couldn't process that. Please try again."
           setVoiceHistory(prev => [...prev, { type: 'assistant', text: err }])
           setVoiceLoading(false)
-          speak(stripMarkdown(err), () => {
+          speak(err, activeLang, () => {
             setIsSpeaking(false)
             if (conversationActiveRef.current && !isListeningRef.current) startListening()
           })
@@ -277,10 +320,25 @@ export default function Chatbot() {
       window.speechSynthesis?.cancel()
       setListening(false)
       setIsSpeaking(false)
+      phaseRef.current  = 'greeting'
+      langRef.current   = 'en'
     } else {
       conversationActiveRef.current = true
       setConversationActive(true)
-      startListeningRef.current?.()
+      phaseRef.current = 'greeting'
+      langRef.current  = 'en'
+
+      // Bilingual greeting — ask language preference
+      setIsSpeaking(true)
+      speak(
+        "Hi! I'm Rishabh's AI assistant. Would you like to speak in English or Hindi? " +
+        "Namaste! Kya aap English mein baat karenge ya Hindi mein?",
+        'en',
+        () => {
+          setIsSpeaking(false)
+          if (conversationActiveRef.current) startListeningRef.current?.()
+        }
+      )
     }
   }, [conversationActive])
 

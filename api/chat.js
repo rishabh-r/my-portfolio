@@ -87,16 +87,25 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { messages, voice } = req.body
+  const { messages, voice, lang } = req.body
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'messages array required' })
   }
+
+  // For voice mode, append a language instruction so the AI responds in the right language
+  const langInstruction = voice
+    ? (lang === 'hi'
+        ? '\n\nLANGUAGE RULE: The user is speaking Hindi. You MUST respond entirely in natural, conversational Hindi using Devanagari script. Do NOT use English words unless they are technical terms with no Hindi equivalent.'
+        : '\n\nLANGUAGE RULE: Respond in English.')
+    : ''
+
+  const systemContent = (voice ? VOICE_PROMPT : SYSTEM_PROMPT) + langInstruction
 
   try {
     const completion = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: voice ? VOICE_PROMPT : SYSTEM_PROMPT },
+        { role: 'system', content: systemContent },
         ...messages.slice(-10),
       ],
       max_tokens: voice ? 120 : 300,
