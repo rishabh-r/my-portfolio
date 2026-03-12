@@ -409,6 +409,15 @@ export default function Chatbot() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
   }
 
+  // ── Clear chat ───────────────────────────────────────────────────────────
+  const clearChat = useCallback(() => {
+    setMessages([{
+      role: 'assistant',
+      content: "Hi! I'm Rishabh's AI assistant 👋 Ask me anything about his experience, skills, or projects!",
+    }])
+    setInput('')
+  }, [])
+
   // ── Orb state ────────────────────────────────────────────────────────────
   const orbState = voiceLoading ? 'loading'
     : isSpeaking          ? 'speaking'
@@ -463,7 +472,19 @@ export default function Chatbot() {
                   <div className="chatbot-subtitle">Ask me anything about Rishabh</div>
                 </div>
               </div>
-              <button className="chatbot-close" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+              <div className="chatbot-header-actions">
+                {messages.length > 1 && activeTab === 'chat' && (
+                  <button
+                    className="chatbot-clear"
+                    onClick={clearChat}
+                    aria-label="Clear chat"
+                    title="Clear chat"
+                  >
+                    🗑
+                  </button>
+                )}
+                <button className="chatbot-close" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+              </div>
             </div>
 
             {/* Tabs */}

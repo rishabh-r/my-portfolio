@@ -1030,7 +1030,14 @@ body {
   color: rgba(255, 255, 255, 0.78);
   margin-top: 1px;
 }
-.chatbot-close {
+.chatbot-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.chatbot-close,
+.chatbot-clear {
   background: rgba(255, 255, 255, 0.18);
   border: none;
   color: white;
@@ -1046,6 +1053,7 @@ body {
   flex-shrink: 0;
 }
 .chatbot-close:hover { background: rgba(255, 255, 255, 0.32); }
+.chatbot-clear:hover { background: rgba(255, 80, 80, 0.45); }
 
 /* ──────────────────────────────────────────────────
    CHATBOT — TABS
