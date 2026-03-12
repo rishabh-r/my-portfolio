@@ -982,9 +982,7 @@ body {
   max-height: 580px;
   display: flex;
   flex-direction: column;
-  background: var(--card);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg), 0 0 0 1px rgba(108, 99, 255, 0.06);
@@ -1189,19 +1187,11 @@ body {
   color: white;
 }
 
-/* Resume chip in suggestions */
+/* Resume chip in suggestions — matches purple pill style */
 .chatbot-suggestion-btn--resume {
-  background: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #059669;
   text-decoration: none;
   display: inline-block;
   font-weight: 600;
-}
-.chatbot-suggestion-btn--resume:hover {
-  background: #10b981;
-  border-color: #10b981;
-  color: white;
 }
 
 /* Resume download button inside chat bubbles */
