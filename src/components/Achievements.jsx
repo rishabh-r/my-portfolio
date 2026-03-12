@@ -33,7 +33,7 @@ const ACHIEVEMENTS = [
   {
     emoji: '⚡',
     num: '2',
-    suffix: ' mo',
+    suffix: ' months',
     label: 'R Systems Full-Time',
     sub: 'Converted in 2 months vs standard 3-month probation',
   },
