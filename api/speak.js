@@ -1,10 +1,8 @@
 // api/speak.js — ElevenLabs TTS serverless function (ES Module)
 
 // ── Voice config ──────────────────────────────────────────────────────────
-// English: "Sarah" — warm, casual, conversational female (sounds very human)
-// Hindi:   "Aria"  — multilingual model handles Hindi naturally
-const EN_VOICE_ID = 'EXAVITQu4vr4xnSDxMaL' // Sarah
-const HI_VOICE_ID = 'EXAVITQu4vr4xnSDxMaL' // Sarah via multilingual_v2 (handles Hindi well)
+const EN_VOICE_ID = 'UgBBYS2sOqTuMpoF3BR0' // English voice
+const HI_VOICE_ID = 'zs7UfyHqCCmny7uTxCYi' // Hindi voice
 
 // eleven_multilingual_v2 = most human, best naturalness, supports Hindi
 // eleven_turbo_v2_5      = faster but slightly less natural (English only)
