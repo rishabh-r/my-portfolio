@@ -64,7 +64,31 @@ function detectLang(text) {
   return hindiChars > 1 ? 'hi' : 'en'
 }
 
-// ─── Speak via ElevenLabs ─────────────────────────────────────────────────
+// ─── Web Speech API fallback (used if ElevenLabs unavailable) ────────────
+function speakFallback(text, lang = 'en', onEnd) {
+  if (!('speechSynthesis' in window)) { onEnd?.(); return }
+  window.speechSynthesis.cancel()
+  const utter   = new SpeechSynthesisUtterance(text)
+  utter.lang    = lang === 'hi' ? 'hi-IN' : 'en-US'
+  utter.rate    = lang === 'hi' ? 1.0 : 1.05
+  utter.pitch   = 1.1
+  utter.onend   = () => onEnd?.()
+  utter.onerror = () => onEnd?.()
+  const trySpeak = () => {
+    const voices = window.speechSynthesis.getVoices()
+    const preferred = lang === 'hi'
+      ? voices.find(v => v.lang === 'hi-IN')
+      : voices.find(v => v.name === 'Google UK English Female') ||
+        voices.find(v => v.name === 'Google US English Female') ||
+        voices.find(v => v.lang.startsWith('en') && /female/i.test(v.name))
+    if (preferred) utter.voice = preferred
+    window.speechSynthesis.speak(utter)
+  }
+  if (window.speechSynthesis.getVoices().length > 0) trySpeak()
+  else window.speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true })
+}
+
+// ─── Speak via ElevenLabs (falls back to Web Speech API on failure) ───────
 async function speak(text, lang = 'en', onEnd) {
   // Stop anything currently playing
   if (currentAudio) {
@@ -73,6 +97,7 @@ async function speak(text, lang = 'en', onEnd) {
     currentAudio.pause()
     currentAudio = null
   }
+  window.speechSynthesis?.cancel()
 
   try {
     const res = await fetch('/api/speak', {
@@ -80,10 +105,11 @@ async function speak(text, lang = 'en', onEnd) {
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ text, lang }),
     })
-    if (!res.ok) throw new Error('TTS fetch failed')
-    const { audio } = await res.json()
+    if (!res.ok) throw new Error(`TTS error ${res.status}`)
+    const data = await res.json()
+    if (!data.audio) throw new Error('No audio in response')
 
-    const bytes  = Uint8Array.from(atob(audio), c => c.charCodeAt(0))
+    const bytes  = Uint8Array.from(atob(data.audio), c => c.charCodeAt(0))
     const blob   = new Blob([bytes], { type: 'audio/mpeg' })
     const url    = URL.createObjectURL(blob)
     const player = new Audio(url)
@@ -94,12 +120,12 @@ async function speak(text, lang = 'en', onEnd) {
       if (currentAudio === player) currentAudio = null
     }
     player.onended = () => { cleanup(); onEnd?.() }
-    player.onerror = () => { cleanup(); onEnd?.() }
-    player.play().catch(() => { cleanup(); onEnd?.() })
+    player.onerror = () => { cleanup(); speakFallback(text, lang, onEnd) }
+    player.play().catch(() => { cleanup(); speakFallback(text, lang, onEnd) })
   } catch (err) {
-    console.error('ElevenLabs TTS error:', err)
+    console.error('ElevenLabs TTS error — falling back to Web Speech:', err)
     currentAudio = null
-    onEnd?.()
+    speakFallback(text, lang, onEnd)
   }
 }
 
