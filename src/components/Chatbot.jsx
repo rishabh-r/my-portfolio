@@ -345,11 +345,29 @@ export default function Chatbot() {
       conversationActiveRef.current = false
       setConversationActive(false)
       recognitionRef.current?.stop()
-      window.speechSynthesis?.cancel()
       setListening(false)
-      setIsSpeaking(false)
-      phaseRef.current  = 'greeting'
-      langRef.current   = 'en'
+
+      // Speak farewell if there was actual conversation, then clear history
+      const farewellLang = langRef.current
+      const hadConversation = voiceHistory.length > 0
+      window.speechSynthesis?.cancel()
+
+      phaseRef.current = 'greeting'
+      langRef.current  = 'en'
+
+      if (hadConversation) {
+        const farewell = farewellLang === 'hi'
+          ? 'बातचीत अच्छी लगी! आपका दिन शुभ हो! 😊'
+          : "It was great talking with you! Have a great day! 😊"
+        setIsSpeaking(true)
+        speak(farewell, farewellLang, () => {
+          setIsSpeaking(false)
+          setVoiceHistory([])
+          setCurrentTranscript('')
+        })
+      } else {
+        setIsSpeaking(false)
+      }
     } else {
       conversationActiveRef.current = true
       setConversationActive(true)
@@ -368,7 +386,7 @@ export default function Chatbot() {
         }
       )
     }
-  }, [conversationActive])
+  }, [conversationActive, voiceHistory])
 
   // ── Chat: send message ───────────────────────────────────────────────────
   const sendMessage = useCallback(async (text) => {
@@ -418,6 +436,19 @@ export default function Chatbot() {
     setInput('')
   }, [])
 
+  // ── Close chat with farewell ─────────────────────────────────────────────
+  const handleClose = useCallback(() => {
+    if (messages.length > 1) {
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "It was great chatting! Have a great day! 😊",
+      }])
+      setTimeout(() => setOpen(false), 1500)
+    } else {
+      setOpen(false)
+    }
+  }, [messages.length])
+
   // ── Orb state ────────────────────────────────────────────────────────────
   const orbState = voiceLoading ? 'loading'
     : isSpeaking          ? 'speaking'
@@ -431,7 +462,7 @@ export default function Chatbot() {
       {/* Floating Action Button */}
       <motion.button
         className="chatbot-fab"
-        onClick={() => setOpen(o => !o)}
+        onClick={() => open ? handleClose() : setOpen(true)}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
         aria-label={open ? 'Close assistant' : 'Open AI assistant'}
@@ -483,7 +514,7 @@ export default function Chatbot() {
                     🗑
                   </button>
                 )}
-                <button className="chatbot-close" onClick={() => setOpen(false)} aria-label="Close">✕</button>
+                <button className="chatbot-close" onClick={handleClose} aria-label="Close">✕</button>
               </div>
             </div>
 
