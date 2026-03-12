@@ -374,11 +374,10 @@ export default function Chatbot() {
       phaseRef.current = 'greeting'
       langRef.current  = 'en'
 
-      // Bilingual greeting — ask language preference
+      // Bilingual greeting — ask language preference (English only, consistent voice)
       setIsSpeaking(true)
       speak(
-        "Hi! I'm Rishabh's AI assistant. Would you like to speak in English or Hindi? " +
-        "Namaste! Kya aap English mein baat karenge ya Hindi mein?",
+        "Hi! I'm Rishabh's AI assistant. Would you like to speak in English or Hindi?",
         'en',
         () => {
           setIsSpeaking(false)
