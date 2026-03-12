@@ -256,7 +256,16 @@ export default function Chatbot() {
         isListeningRef.current = false
         setListening(false)
         const spoken = transcriptRef.current.trim()
-        if (!spoken || !conversationActiveRef.current) return
+
+        // Nothing was said — if AI is done speaking and conversation is still active, restart listening
+        if (!spoken) {
+          if (conversationActiveRef.current && !window.speechSynthesis.speaking) {
+            setTimeout(() => startListening(), 300)
+          }
+          return
+        }
+
+        if (!conversationActiveRef.current) return
         setCurrentTranscript('')
 
         // ── GREETING PHASE: parse language preference ─────────────────────
