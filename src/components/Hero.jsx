@@ -20,6 +20,7 @@ const BADGES = [
   { text: '🔍 RAG Systems', delay: 0.9 },
   { text: '🐍 Python', delay: 1.0 },
   { text: '✨ Gemini', delay: 1.1 },
+  { text: '🔺 Claude (Anthropic)', delay: 1.2 },
 ]
 
 function useTypewriter(words, typingSpeed = 70, pause = 1800) {
