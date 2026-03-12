@@ -7,8 +7,8 @@ const SpeechRecognitionAPI =
     ? window.SpeechRecognition || window.webkitSpeechRecognition
     : null
 
-const speechSynthesisAvailable =
-  typeof window !== 'undefined' && 'speechSynthesis' in window
+// ─── ElevenLabs TTS — module-level audio tracker ──────────────────────────
+let currentAudio = null
 
 // ─── Markdown renderer ────────────────────────────────────────────────────
 function renderMarkdown(text) {
@@ -64,45 +64,43 @@ function detectLang(text) {
   return hindiChars > 1 ? 'hi' : 'en'
 }
 
-// ─── Speak — bilingual (en/hi), Indian female voice ──────────────────────
-function speak(text, lang = 'en', onEnd) {
-  if (!speechSynthesisAvailable) { onEnd?.(); return }
-  window.speechSynthesis.cancel()
-  const utter        = new SpeechSynthesisUtterance(text)
-  utter.rate         = lang === 'hi' ? 1.0 : 1.08
-  utter.pitch        = lang === 'hi' ? 1.1 : 1.2
-  utter.lang         = lang === 'hi' ? 'hi-IN' : 'en-GB'
-  utter.onend        = () => onEnd?.()
-  utter.onerror      = () => onEnd?.()
-
-  const trySpeak = () => {
-    const voices = window.speechSynthesis.getVoices()
-    let preferred
-    if (lang === 'hi') {
-      preferred =
-        voices.find(v => v.lang === 'hi-IN' && /female/i.test(v.name)) ||
-        voices.find(v => v.lang === 'hi-IN')                            ||
-        voices.find(v => v.lang.startsWith('hi'))
-    } else {
-      // Priority: Google natural female → Microsoft Zira → Raveena → en-IN female → any en female
-      preferred =
-        voices.find(v => v.name === 'Google UK English Female')                ||
-        voices.find(v => v.name === 'Google US English Female')                ||
-        voices.find(v => /zira/i.test(v.name))                                 ||
-        voices.find(v => v.name.includes('Raveena'))                           ||
-        voices.find(v => v.lang === 'en-IN' && /female/i.test(v.name))        ||
-        voices.find(v => v.lang === 'en-IN')                                   ||
-        voices.find(v => v.lang === 'en-GB' && /female/i.test(v.name))        ||
-        voices.find(v => v.lang === 'en-AU' && /female/i.test(v.name))        ||
-        voices.find(v => v.lang.startsWith('en') && /female/i.test(v.name))   ||
-        voices.find(v => /female/i.test(v.name))
-    }
-    if (preferred) utter.voice = preferred
-    window.speechSynthesis.speak(utter)
+// ─── Speak via ElevenLabs ─────────────────────────────────────────────────
+async function speak(text, lang = 'en', onEnd) {
+  // Stop anything currently playing
+  if (currentAudio) {
+    currentAudio.onended = null
+    currentAudio.onerror = null
+    currentAudio.pause()
+    currentAudio = null
   }
 
-  if (window.speechSynthesis.getVoices().length > 0) trySpeak()
-  else window.speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true })
+  try {
+    const res = await fetch('/api/speak', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ text, lang }),
+    })
+    if (!res.ok) throw new Error('TTS fetch failed')
+    const { audio } = await res.json()
+
+    const bytes  = Uint8Array.from(atob(audio), c => c.charCodeAt(0))
+    const blob   = new Blob([bytes], { type: 'audio/mpeg' })
+    const url    = URL.createObjectURL(blob)
+    const player = new Audio(url)
+    currentAudio = player
+
+    const cleanup = () => {
+      URL.revokeObjectURL(url)
+      if (currentAudio === player) currentAudio = null
+    }
+    player.onended = () => { cleanup(); onEnd?.() }
+    player.onerror = () => { cleanup(); onEnd?.() }
+    player.play().catch(() => { cleanup(); onEnd?.() })
+  } catch (err) {
+    console.error('ElevenLabs TTS error:', err)
+    currentAudio = null
+    onEnd?.()
+  }
 }
 
 // ─── Panel animation variants ─────────────────────────────────────────────
@@ -202,7 +200,12 @@ export default function Chatbot() {
       conversationActiveRef.current = false
       setConversationActive(false)
       recognitionRef.current?.stop()
-      window.speechSynthesis?.cancel()
+      if (currentAudio) {
+        currentAudio.onended = null
+        currentAudio.onerror = null
+        currentAudio.pause()
+        currentAudio = null
+      }
       setListening(false)
       setIsSpeaking(false)
     }
@@ -212,7 +215,12 @@ export default function Chatbot() {
   useEffect(() => {
     return () => {
       recognitionRef.current?.stop()
-      window.speechSynthesis?.cancel()
+      if (currentAudio) {
+        currentAudio.onended = null
+        currentAudio.onerror = null
+        currentAudio.pause()
+        currentAudio = null
+      }
     }
   }, [])
 
@@ -236,9 +244,12 @@ export default function Chatbot() {
       }
 
       recognition.onresult = (event) => {
-        // BARGE-IN: cancel AI speech the moment user starts talking
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel()
+        // BARGE-IN: stop AI audio the moment user starts talking
+        if (currentAudio) {
+          currentAudio.onended = null
+          currentAudio.onerror = null
+          currentAudio.pause()
+          currentAudio = null
           setIsSpeaking(false)
         }
         let interim = '', final = ''
@@ -259,7 +270,7 @@ export default function Chatbot() {
 
         // Nothing was said — if AI is done speaking and conversation is still active, restart listening
         if (!spoken) {
-          if (conversationActiveRef.current && !window.speechSynthesis.speaking) {
+          if (conversationActiveRef.current && !currentAudio) {
             setTimeout(() => startListening(), 300)
           }
           return
@@ -314,11 +325,10 @@ export default function Chatbot() {
           setVoiceHistory(prev => [...prev, { type: 'assistant', text: data.reply }])
           setVoiceLoading(false)
           setIsSpeaking(true)
-          startListening()   // barge-in ready while AI speaks
 
           speak(stripMarkdown(data.reply), activeLang, () => {
             setIsSpeaking(false)
-            if (conversationActiveRef.current && !isListeningRef.current) startListening()
+            if (conversationActiveRef.current) startListening()
           })
         } catch {
           const err = activeLang === 'hi'
@@ -328,7 +338,7 @@ export default function Chatbot() {
           setVoiceLoading(false)
           speak(err, activeLang, () => {
             setIsSpeaking(false)
-            if (conversationActiveRef.current && !isListeningRef.current) startListening()
+            if (conversationActiveRef.current) startListening()
           })
         }
       }
@@ -363,10 +373,17 @@ export default function Chatbot() {
       recognitionRef.current?.stop()
       setListening(false)
 
+      // Stop any playing audio
+      if (currentAudio) {
+        currentAudio.onended = null
+        currentAudio.onerror = null
+        currentAudio.pause()
+        currentAudio = null
+      }
+
       // Speak farewell if there was actual conversation, then clear history
       const farewellLang = langRef.current
       const hadConversation = voiceHistory.length > 0
-      window.speechSynthesis?.cancel()
 
       phaseRef.current = 'greeting'
       langRef.current  = 'en'
