@@ -699,7 +699,7 @@ body {
   z-index: 1;
 }
 .flip-card {
-  height: 280px;
+  height: 360px;
   perspective: 1200px;
   cursor: pointer;
 }
@@ -759,8 +759,8 @@ body {
   color: var(--purple);
 }
 .project-desc {
-  font-size: 0.88rem;
-  line-height: 1.65;
+  font-size: 0.83rem;
+  line-height: 1.55;
   opacity: 0.95;
   flex: 1;
   margin-bottom: 16px;
@@ -769,8 +769,8 @@ body {
   list-style: none;
 }
 .project-features li {
-  font-size: 0.8rem;
-  padding: 3px 0 3px 14px;
+  font-size: 0.78rem;
+  padding: 2px 0 2px 14px;
   position: relative;
   opacity: 0.9;
 }
@@ -941,7 +941,7 @@ body {
   .timeline-dot { left: 20px; }
 
   .projects-grid { grid-template-columns: 1fr; }
-  .flip-card { height: 320px; }
+  .flip-card { height: 400px; }
 }
 
 @media (max-width: 480px) {
