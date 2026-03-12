@@ -1439,68 +1439,28 @@ body {
   box-shadow: 0 0 0 2px rgba(253,211,77,0.6), 0 6px 28px rgba(251,191,36,0.5), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
-/* Mic icon label */
-.ai-orb-label {
-  font-size: 0.52rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.45);
-}
-.ai-orb--listening .ai-orb-label { color: rgba(255,150,150,0.7); }
-.ai-orb--speaking  .ai-orb-label { color: rgba(100,255,200,0.7); }
-
-/* Equalizer bars — always present, animate per state */
-.ai-orb-eq {
+/* Status display (replaces eq bars) */
+.ai-orb-status-display {
   display: flex;
-  align-items: flex-end;
-  gap: 2.5px;
-  height: 28px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
-.ai-orb-eq-bar {
-  width: 3.5px;
-  border-radius: 2px 2px 1px 1px;
-  background: rgba(255,255,255,0.85);
-  min-height: 3px;
-  transform-origin: bottom center;
-  transition: background 0.3s;
+.ai-orb-status-icon {
+  font-size: 1.8rem;
+  line-height: 1;
 }
-
-/* Idle — short flat bars, no animation */
-.ai-orb--idle .ai-orb-eq-bar,
-.ai-orb--active .ai-orb-eq-bar {
-  height: 5px;
-  animation: eqIdle 2.4s ease-in-out infinite alternate;
+.ai-orb-status-text {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
 }
-.ai-orb--idle   .ai-orb-eq-bar { background: rgba(255,255,255,0.55); }
-.ai-orb--active .ai-orb-eq-bar { background: rgba(255,255,255,0.8); animation-duration: 1.4s; }
-
-/* Listening — tall, fast, red */
-.ai-orb--listening .ai-orb-eq-bar {
-  background: rgba(252,165,165,0.9);
-  animation: eqListen 0.45s ease-in-out infinite alternate;
-}
-
-/* Speaking — medium, smooth, green */
-.ai-orb--speaking .ai-orb-eq-bar {
-  background: rgba(110,231,183,0.9);
-  animation: eqSpeak 0.7s ease-in-out infinite alternate;
-}
-
-/* Loading — amber slow pulse */
-.ai-orb--loading .ai-orb-eq-bar {
-  background: rgba(253,230,138,0.8);
-  animation: eqIdle 1s ease-in-out infinite alternate;
-}
-
-/* Per-bar delays and heights for natural look */
-.ai-orb-eq-bar:nth-child(1) { height: 8px;  animation-delay: 0s;    }
-.ai-orb-eq-bar:nth-child(2) { height: 16px; animation-delay: 0.08s; }
-.ai-orb-eq-bar:nth-child(3) { height: 22px; animation-delay: 0.16s; }
-.ai-orb-eq-bar:nth-child(4) { height: 26px; animation-delay: 0.06s; }
-.ai-orb-eq-bar:nth-child(5) { height: 22px; animation-delay: 0.12s; }
-.ai-orb-eq-bar:nth-child(6) { height: 16px; animation-delay: 0.04s; }
-.ai-orb-eq-bar:nth-child(7) { height: 8px;  animation-delay: 0.1s;  }
+.ai-orb--listening .ai-orb-status-text { color: rgba(252,165,165,0.95); }
+.ai-orb--speaking  .ai-orb-status-text { color: rgba(110,231,183,0.95); }
 
 /* Loading spinner (replaces eq bars) */
 .ai-orb-spinner {

@@ -226,7 +226,7 @@ export default function Chatbot() {
       recognition.continuous     = false
       recognition.interimResults = true
       // hi-IN handles both Hindi & English well in Chrome (2025)
-      recognition.lang           = langRef.current === 'hi' ? 'hi-IN' : 'en-IN'
+      recognition.lang           = langRef.current === 'hi' ? 'hi-IN' : 'en-US'
 
       recognition.onstart = () => {
         isListeningRef.current = true
@@ -627,18 +627,18 @@ export default function Chatbot() {
                           {voiceLoading ? (
                             <span className="ai-orb-spinner" />
                           ) : (
-                            <div className="ai-orb-eq">
-                              {[...Array(7)].map((_, i) => (
-                                <span key={i} className="ai-orb-eq-bar" />
-                              ))}
+                            <div className="ai-orb-status-display">
+                              <span className="ai-orb-status-icon">
+                                {orbState === 'speaking'  ? '🔊' :
+                                 orbState === 'listening' ? '🎙' : '🎙'}
+                              </span>
+                              <span className="ai-orb-status-text">
+                                {orbState === 'listening' ? 'Listening' :
+                                 orbState === 'speaking'  ? 'Bot speaking' :
+                                 orbState === 'active'    ? 'Ready' : 'Tap to talk'}
+                              </span>
                             </div>
                           )}
-                          <span className="ai-orb-label">
-                            {orbState === 'listening' ? 'listening' :
-                             orbState === 'speaking'  ? 'speaking'  :
-                             orbState === 'loading'   ? 'thinking'  :
-                             orbState === 'active'    ? 'ready'     : 'tap to talk'}
-                          </span>
                         </div>
                       </button>
 
