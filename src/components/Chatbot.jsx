@@ -129,6 +129,7 @@ export default function Chatbot() {
   const recognitionRef        = useRef(null)
   const transcriptRef         = useRef('')
   const conversationActiveRef = useRef(false)
+  const isListeningRef        = useRef(false)   // true while recognition is active
   const startListeningRef     = useRef(null)
 
   // Auto-scroll chat
@@ -170,6 +171,8 @@ export default function Chatbot() {
   useEffect(() => {
     function startListening() {
       if (!SpeechRecognitionAPI || !conversationActiveRef.current) return
+      // Don't double-start
+      if (isListeningRef.current) return
 
       const recognition = new SpeechRecognitionAPI()
       recognition.continuous     = false
@@ -177,12 +180,19 @@ export default function Chatbot() {
       recognition.lang           = 'en-IN'
 
       recognition.onstart = () => {
+        isListeningRef.current = true
         setListening(true)
         setCurrentTranscript('')
         transcriptRef.current = ''
       }
 
       recognition.onresult = (event) => {
+        // ── BARGE-IN: user started talking, cancel AI speech immediately ──
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel()
+          setIsSpeaking(false)
+        }
+
         let interim = '', final = ''
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const t = event.results[i][0].transcript
@@ -195,6 +205,7 @@ export default function Chatbot() {
       }
 
       recognition.onend = async () => {
+        isListeningRef.current = false
         setListening(false)
         const spoken = transcriptRef.current.trim()
         if (!spoken || !conversationActiveRef.current) return
@@ -216,9 +227,13 @@ export default function Chatbot() {
           setVoiceLoading(false)
           setIsSpeaking(true)
 
+          // Start listening for barge-in WHILE AI is speaking
+          startListening()
+
           speak(stripMarkdown(data.reply), () => {
             setIsSpeaking(false)
-            if (conversationActiveRef.current) startListening()
+            // Only restart if not already listening (wasn't interrupted)
+            if (conversationActiveRef.current && !isListeningRef.current) startListening()
           })
         } catch {
           const err = "Sorry, I couldn't process that. Please try again."
@@ -226,12 +241,13 @@ export default function Chatbot() {
           setVoiceLoading(false)
           speak(stripMarkdown(err), () => {
             setIsSpeaking(false)
-            if (conversationActiveRef.current) startListening()
+            if (conversationActiveRef.current && !isListeningRef.current) startListening()
           })
         }
       }
 
       recognition.onerror = (event) => {
+        isListeningRef.current = false
         setListening(false)
         if (event.error === 'not-allowed') {
           setVoiceHistory(prev => [...prev, {
