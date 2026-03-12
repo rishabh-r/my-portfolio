@@ -1,7 +1,5 @@
-import { useRef, lazy, Suspense } from 'react'
+import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-
-const OrbScene = lazy(() => import('../three/OrbScene'))
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -11,6 +9,14 @@ const fadeUp = {
     transition: { duration: 0.6, delay: i * 0.12, ease: 'easeOut' },
   }),
 }
+
+const FLOAT_TAGS = [
+  { text: '🧠 LLM Expert',   top: '4%',  left: '-5%'  },
+  { text: '⚙️ RAG Systems',  top: '4%',  right: '-5%' },
+  { text: '🎙 Voice AI',     top: '42%', left: '-12%' },
+  { text: '🤖 AI Agents',    top: '42%', right: '-12%'},
+  { text: '🏥 Healthcare AI',bottom: '6%', left: '8%'  },
+]
 
 export default function About() {
   const ref = useRef()
@@ -112,7 +118,7 @@ export default function About() {
           </motion.div>
         </div>
 
-        {/* 3D Orb side */}
+        {/* Photo side */}
         <motion.div
           className="about-visual"
           variants={fadeUp}
@@ -120,40 +126,40 @@ export default function About() {
           initial="hidden"
           animate={inView ? 'visible' : 'hidden'}
         >
-          <div className="orb-canvas-wrapper">
-            <Suspense fallback={null}>
-              <OrbScene />
-            </Suspense>
-            {/* Floating tags around orb */}
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-              {[
-                { text: '🧠 LLM', top: '8%', left: '10%' },
-                { text: '⚙️ RAG', top: '8%', right: '5%' },
-                { text: '🎙 Voice AI', bottom: '30%', left: '0%' },
-                { text: '🤖 Agents', bottom: '30%', right: '0%' },
-                { text: '🏥 FHIR', bottom: '8%', left: '20%' },
-              ].map(({ text, ...pos }) => (
-                <motion.div
-                  key={text}
-                  style={{
-                    position: 'absolute',
-                    ...pos,
-                    background: 'rgba(255,255,255,0.9)',
-                    border: '1px solid rgba(108,99,255,0.2)',
-                    borderRadius: 30,
-                    padding: '6px 14px',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    boxShadow: '0 4px 16px rgba(108,99,255,0.12)',
-                    backdropFilter: 'blur(10px)',
-                  }}
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 3 + Math.random() * 2, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  {text}
-                </motion.div>
-              ))}
-            </div>
+          <div className="photo-wrapper">
+            {/* Gradient border frame */}
+            <motion.div
+              className="photo-frame"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <img
+                src="/photo.jpg"
+                alt="Rishabh Raj"
+                className="profile-photo"
+              />
+            </motion.div>
+
+            {/* Floating skill tags */}
+            {FLOAT_TAGS.map(({ text, ...pos }, i) => (
+              <motion.div
+                key={text}
+                className="photo-float-tag"
+                style={{ position: 'absolute', ...pos }}
+                animate={{ y: [0, -7, 0] }}
+                transition={{
+                  duration: 3 + i * 0.5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: i * 0.4,
+                }}
+              >
+                {text}
+              </motion.div>
+            ))}
+
+            {/* Decorative ring */}
+            <div className="photo-ring" />
           </div>
         </motion.div>
       </div>
