@@ -614,33 +614,34 @@ export default function Chatbot() {
                                                     'Tap the orb to start talking'}
                       </div>
 
-                      {/* ── Music Visualizer Mic ── */}
-                      <button
-                        className={`ai-orb ai-orb--${orbState}`}
-                        onClick={toggleConversation}
-                        disabled={voiceLoading}
-                        aria-label={conversationActive ? 'Stop conversation' : 'Start conversation'}
-                        title={conversationActive ? 'Tap to stop' : 'Tap to start talking'}
-                      >
-                        <div className="ai-orb-glow" />
-                        <div className="ai-orb-body">
-                          {voiceLoading ? (
-                            <span className="ai-orb-spinner" />
-                          ) : (
-                            <div className="ai-orb-status-display">
+                      {/* ── Orb ── */}
+                      <div className="ai-orb-wrapper">
+                        <button
+                          className={`ai-orb ai-orb--${orbState}`}
+                          onClick={toggleConversation}
+                          disabled={voiceLoading}
+                          aria-label={conversationActive ? 'Stop conversation' : 'Start conversation'}
+                          title={conversationActive ? 'Tap to stop' : 'Tap to start talking'}
+                        >
+                          <div className="ai-orb-glow" />
+                          <div className="ai-orb-body">
+                            {voiceLoading ? (
+                              <span className="ai-orb-spinner" />
+                            ) : (
                               <span className="ai-orb-status-icon">
-                                {orbState === 'speaking'  ? '🔊' :
-                                 orbState === 'listening' ? '🎙' : '🎙'}
+                                {orbState === 'speaking' ? '🔊' : '🎙'}
                               </span>
-                              <span className="ai-orb-status-text">
-                                {orbState === 'listening' ? 'Listening' :
-                                 orbState === 'speaking'  ? 'Bot speaking' :
-                                 orbState === 'active'    ? 'Ready' : 'Tap to talk'}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </button>
+                            )}
+                          </div>
+                        </button>
+
+                        <span className={`ai-orb-status-text ai-orb-status-text--${orbState}`}>
+                          {orbState === 'listening' ? 'Listening' :
+                           orbState === 'speaking'  ? 'Bot speaking' :
+                           orbState === 'loading'   ? 'Thinking…' :
+                           orbState === 'active'    ? 'Ready' : 'Tap to talk'}
+                        </span>
+                      </div>
 
                       {/* Stop hint */}
                       {conversationActive && (

@@ -1419,12 +1419,9 @@ body {
     0 6px 28px rgba(139,92,246,0.55),
     inset 0 1px 0 rgba(255,255,255,0.22);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 5px;
   transition: box-shadow 0.3s, background 0.3s;
-  overflow: hidden;
 }
 .ai-orb--listening .ai-orb-body {
   background: linear-gradient(145deg, #f87171 0%, #ef4444 55%, #dc2626 100%);
@@ -1439,28 +1436,33 @@ body {
   box-shadow: 0 0 0 2px rgba(253,211,77,0.6), 0 6px 28px rgba(251,191,36,0.5), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
-/* Status display (replaces eq bars) */
-.ai-orb-status-display {
+/* Orb wrapper — stacks orb + label */
+.ai-orb-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  gap: 8px;
 }
+
+/* Icon inside orb */
 .ai-orb-status-icon {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
   line-height: 1;
 }
+
+/* Status label below orb */
 .ai-orb-status-text {
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.6);
+  color: rgba(160,160,200,0.75);
   white-space: nowrap;
 }
-.ai-orb--listening .ai-orb-status-text { color: rgba(252,165,165,0.95); }
-.ai-orb--speaking  .ai-orb-status-text { color: rgba(110,231,183,0.95); }
+.ai-orb-status-text--listening { color: rgba(255,180,180,0.85); }
+.ai-orb-status-text--speaking  { color: rgba(134,239,172,0.85); }
+.ai-orb-status-text--loading   { color: rgba(253,211,77,0.8);   }
+.ai-orb-status-text--active    { color: rgba(196,181,253,0.8);  }
 
 /* Loading spinner (replaces eq bars) */
 .ai-orb-spinner {
