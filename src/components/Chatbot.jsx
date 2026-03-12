@@ -69,9 +69,9 @@ function speak(text, lang = 'en', onEnd) {
   if (!speechSynthesisAvailable) { onEnd?.(); return }
   window.speechSynthesis.cancel()
   const utter        = new SpeechSynthesisUtterance(text)
-  utter.rate         = 1.0
-  utter.pitch        = 1.1
-  utter.lang         = lang === 'hi' ? 'hi-IN' : 'en-IN'
+  utter.rate         = lang === 'hi' ? 1.0 : 1.08
+  utter.pitch        = lang === 'hi' ? 1.1 : 1.2
+  utter.lang         = lang === 'hi' ? 'hi-IN' : 'en-GB'
   utter.onend        = () => onEnd?.()
   utter.onerror      = () => onEnd?.()
 
@@ -84,11 +84,18 @@ function speak(text, lang = 'en', onEnd) {
         voices.find(v => v.lang === 'hi-IN')                            ||
         voices.find(v => v.lang.startsWith('hi'))
     } else {
+      // Priority: Google natural female → Microsoft Zira → Raveena → en-IN female → any en female
       preferred =
+        voices.find(v => v.name === 'Google UK English Female')                ||
+        voices.find(v => v.name === 'Google US English Female')                ||
+        voices.find(v => /zira/i.test(v.name))                                 ||
         voices.find(v => v.name.includes('Raveena'))                           ||
         voices.find(v => v.lang === 'en-IN' && /female/i.test(v.name))        ||
         voices.find(v => v.lang === 'en-IN')                                   ||
-        voices.find(v => /india/i.test(v.name))
+        voices.find(v => v.lang === 'en-GB' && /female/i.test(v.name))        ||
+        voices.find(v => v.lang === 'en-AU' && /female/i.test(v.name))        ||
+        voices.find(v => v.lang.startsWith('en') && /female/i.test(v.name))   ||
+        voices.find(v => /female/i.test(v.name))
     }
     if (preferred) utter.voice = preferred
     window.speechSynthesis.speak(utter)
