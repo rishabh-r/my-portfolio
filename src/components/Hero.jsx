@@ -140,17 +140,6 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="hero-scroll"
-        onClick={() => scrollTo('about')}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-      >
-        <div className="scroll-mouse" />
-        <span>scroll</span>
-      </motion.div>
     </section>
   )
 }
