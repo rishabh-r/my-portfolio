@@ -47,6 +47,17 @@ function parseBold(text) {
   )
 }
 
+// ─── Strip markdown for TTS (removes **, *, -, # etc.) ───────────────────
+function stripMarkdown(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1')   // bold
+    .replace(/\*(.*?)\*/g, '$1')        // italic
+    .replace(/^[-*]\s+/gm, '')          // bullet points
+    .replace(/^#+\s+/gm, '')            // headings
+    .replace(/`(.*?)`/g, '$1')          // inline code
+    .trim()
+}
+
 // ─── Speak — Indian female voice + onEnd callback ─────────────────────────
 function speak(text, onEnd) {
   if (!speechSynthesisAvailable) { onEnd?.(); return }
@@ -205,7 +216,7 @@ export default function Chatbot() {
           setVoiceLoading(false)
           setIsSpeaking(true)
 
-          speak(data.reply, () => {
+          speak(stripMarkdown(data.reply), () => {
             setIsSpeaking(false)
             if (conversationActiveRef.current) startListening()
           })
@@ -213,7 +224,7 @@ export default function Chatbot() {
           const err = "Sorry, I couldn't process that. Please try again."
           setVoiceHistory(prev => [...prev, { type: 'assistant', text: err }])
           setVoiceLoading(false)
-          speak(err, () => {
+          speak(stripMarkdown(err), () => {
             setIsSpeaking(false)
             if (conversationActiveRef.current) startListening()
           })
@@ -508,7 +519,9 @@ export default function Chatbot() {
                               <span className="chatbot-voice-item-label">
                                 {item.type === 'user' ? '🧑 You' : '🤖 AI'}
                               </span>
-                              <p>{item.text}</p>
+                              {item.type === 'assistant'
+                                ? <div>{renderMarkdown(item.text)}</div>
+                                : <p>{item.text}</p>}
                             </div>
                           ))}
                           {voiceLoading && (
