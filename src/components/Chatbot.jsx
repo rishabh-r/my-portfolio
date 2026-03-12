@@ -10,6 +10,43 @@ const SpeechRecognitionAPI =
 const speechSynthesisAvailable =
   typeof window !== 'undefined' && 'speechSynthesis' in window
 
+// ─── Markdown renderer ────────────────────────────────────────────────────
+function renderMarkdown(text) {
+  const lines = text.split('\n')
+  const elements = []
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+    if (/^[-*]\s+/.test(line)) {
+      const items = []
+      while (i < lines.length && /^[-*]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^[-*]\s+/, ''))
+        i++
+      }
+      elements.push(
+        <ul key={i} style={{ paddingLeft: '1.2em', margin: '4px 0' }}>
+          {items.map((item, j) => (
+            <li key={j} style={{ marginBottom: '2px' }}>{parseBold(item)}</li>
+          ))}
+        </ul>
+      )
+    } else if (line.trim() === '') {
+      i++
+    } else {
+      elements.push(<p key={i} style={{ margin: '4px 0' }}>{parseBold(line)}</p>)
+      i++
+    }
+  }
+  return elements
+}
+
+function parseBold(text) {
+  const parts = text.split(/\*\*(.*?)\*\*/g)
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+  )
+}
+
 // ─── Speak helper ─────────────────────────────────────────────────────────
 function speak(text) {
   if (!speechSynthesisAvailable) return
@@ -320,7 +357,9 @@ export default function Chatbot() {
                         {msg.role === 'assistant' && (
                           <span className="chatbot-msg-avatar">🤖</span>
                         )}
-                        <div className="chatbot-bubble">{msg.content}</div>
+                        <div className="chatbot-bubble">
+                          {msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
+                        </div>
                       </div>
                     ))}
 
