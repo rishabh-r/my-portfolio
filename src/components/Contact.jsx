@@ -111,7 +111,7 @@ export default function Contact() {
         <div className="contact-footer">
           <p>Designed & built by <strong>Rishabh Raj</strong> <span>♥</span></p>
           <p style={{ marginTop: 6, fontSize: '0.78rem', opacity: 0.7 }}>
-            Generative AI Engineer · BIT Mesra · 2024
+            Generative AI Engineer · BIT Mesra · 2026
           </p>
         </div>
       </div>
