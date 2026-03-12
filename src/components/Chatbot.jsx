@@ -357,8 +357,8 @@ export default function Chatbot() {
 
       if (hadConversation) {
         const farewell = farewellLang === 'hi'
-          ? 'बातचीत अच्छी लगी! आपका दिन शुभ हो! 😊'
-          : "It was great talking with you! Have a great day! 😊"
+          ? 'बातचीत अच्छी लगी! आपका दिन शुभ हो!'
+          : "It was great talking with you! Have a great day!"
         setIsSpeaking(true)
         speak(farewell, farewellLang, () => {
           setIsSpeaking(false)
