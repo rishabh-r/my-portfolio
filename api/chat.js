@@ -7,8 +7,8 @@ const RISHABH_BIO = `
 ABOUT RISHABH RAJ:
 - Current Role: Gen AI Engineer (Senior Data Engineer) at R Systems International, Noida (September 2025 – Present)
   * Built fully conversational AI voice agent for hospital inbound calls using Retell AI and Make.com
-  * Developed FHIR-compliant healthcare chatbot on Azure AI Foundry
-  * Engineered FHIR REST API integrations for Patient Search, Encounters, Medications, Conditions
+  * Built RSICareBridge on Azure AI Foundry — FHIR standard healthcare chatbot easily integrated in any EHR platform
+  * Engineered FHIR R4 REST API integrations for Patient Search, Encounters, Medications, Conditions, Procedures
   * Engineered dynamic pickup item assembly: detects barcode vs model name, builds structured orders automatically
 
 - Previous: Gen AI Engineer (Technical Program Manager) at Tracxn Technologies, Bengaluru (June 2025 – September 2025)
