@@ -1181,6 +1181,43 @@ body {
   color: white;
 }
 
+/* Resume chip in suggestions */
+.chatbot-suggestion-btn--resume {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #059669;
+  text-decoration: none;
+  display: inline-block;
+  font-weight: 600;
+}
+.chatbot-suggestion-btn--resume:hover {
+  background: #10b981;
+  border-color: #10b981;
+  color: white;
+}
+
+/* Resume download button inside chat bubbles */
+.chatbot-resume-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+}
+.chatbot-resume-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(16,185,129,0.45);
+  color: white;
+}
+
 /* ──────────────────────────────────────────────────
    CHATBOT — INPUT ROW
 ────────────────────────────────────────────────── */

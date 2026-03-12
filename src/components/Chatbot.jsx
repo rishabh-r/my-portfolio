@@ -105,6 +105,34 @@ const panelVariants = {
   exit:    { opacity: 0, y: 16, scale: 0.96, transition: { duration: 0.18 } },
 }
 
+// ─── Resume download button (used inside chat bubbles) ────────────────────
+function ResumeDownloadBtn() {
+  return (
+    <a
+      className="chatbot-resume-btn"
+      href="/Rishabh_Raj_Resume.docx"
+      download="Rishabh_Raj_Resume.docx"
+    >
+      ⬇ Download Rishabh's Resume
+    </a>
+  )
+}
+
+// ─── Render message content — handles [RESUME_DOWNLOAD] tag ───────────────
+function renderMessageContent(text) {
+  const parts = text.split('[RESUME_DOWNLOAD]')
+  return (
+    <>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {part.trim() ? renderMarkdown(part.trim()) : null}
+          {i < parts.length - 1 && <ResumeDownloadBtn />}
+        </span>
+      ))}
+    </>
+  )
+}
+
 // ─── Suggested questions ──────────────────────────────────────────────────
 const SUGGESTIONS = [
   "What is Rishabh's current role?",
@@ -463,7 +491,7 @@ export default function Chatbot() {
                       <div key={i} className={`chatbot-message chatbot-message--${msg.role}`}>
                         {msg.role === 'assistant' && <span className="chatbot-msg-avatar">🤖</span>}
                         <div className="chatbot-bubble">
-                          {msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
+                          {msg.role === 'assistant' ? renderMessageContent(msg.content) : msg.content}
                         </div>
                       </div>
                     ))}
@@ -483,6 +511,13 @@ export default function Chatbot() {
                       {SUGGESTIONS.map((s, i) => (
                         <button key={i} className="chatbot-suggestion-btn" onClick={() => sendMessage(s)}>{s}</button>
                       ))}
+                      <a
+                        className="chatbot-suggestion-btn chatbot-suggestion-btn--resume"
+                        href="/Rishabh_Raj_Resume.docx"
+                        download="Rishabh_Raj_Resume.docx"
+                      >
+                        ⬇ Download Rishabh's Resume
+                      </a>
                     </div>
                   )}
 
