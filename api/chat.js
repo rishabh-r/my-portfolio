@@ -96,7 +96,7 @@ export default async function handler(req, res) {
   // For voice mode, append a language instruction so the AI responds in the right language
   const langInstruction = voice
     ? (lang === 'hi'
-        ? '\n\nLANGUAGE RULE: The user is speaking Hindi. You MUST respond entirely in natural, conversational Hindi using Devanagari script. Do NOT use English words unless they are technical terms with no Hindi equivalent.'
+        ? '\n\nLANGUAGE RULE: The user is speaking Hindi. Respond in casual, everyday spoken Hindi (Hinglish style is fine — mix common English words naturally like "AI", "projects", "experience"). CRITICAL GRAMMAR: You are a FEMALE assistant — always use feminine verb forms and endings. Use "karungi" not "karunga", "jaungi" not "jaunga", "bolungi" not "bolunga", "hogi" not "hoga" when referring to yourself. Use "maine kiya", "mujhe laga" etc. Keep it casual and friendly — avoid shudh/formal Hindi. Sound like a young Indian woman chatting naturally.'
         : '\n\nLANGUAGE RULE: Respond in English.')
     : ''
 
