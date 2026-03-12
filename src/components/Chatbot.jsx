@@ -77,10 +77,11 @@ function speakFallback(text, lang = 'en', onEnd) {
   const trySpeak = () => {
     const voices = window.speechSynthesis.getVoices()
     const preferred = lang === 'hi'
-      ? voices.find(v => v.lang === 'hi-IN')
-      : voices.find(v => v.name === 'Google UK English Female') ||
-        voices.find(v => v.name === 'Google US English Female') ||
-        voices.find(v => v.lang.startsWith('en') && /female/i.test(v.name))
+      ? voices.find(v => v.lang === 'hi-IN' && /male/i.test(v.name)) ||
+        voices.find(v => v.lang === 'hi-IN')
+      : voices.find(v => v.name === 'Google UK English Male') ||
+        voices.find(v => v.name === 'Google US English Male') ||
+        voices.find(v => v.lang.startsWith('en') && /male/i.test(v.name) && !/fe/i.test(v.name))
     if (preferred) utter.voice = preferred
     window.speechSynthesis.speak(utter)
   }
