@@ -138,6 +138,13 @@ export default function Hero() {
           <button className="btn-secondary" onClick={() => scrollTo('contact')}>
             Contact Me
           </button>
+          <a
+            className="btn-resume"
+            href="/Rishabh_Raj_Resume.docx"
+            download="Rishabh_Raj_Resume.docx"
+          >
+            ⬇ Download Resume
+          </a>
         </motion.div>
       </div>
 

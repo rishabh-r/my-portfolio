@@ -316,6 +316,29 @@ body {
 }
 .btn-secondary:hover { background: var(--purple); color: white; transform: translateY(-3px); }
 
+.btn-resume {
+  background: transparent;
+  color: var(--text1);
+  border: 2px solid rgba(108,99,255,0.35);
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(10px);
+}
+.btn-resume:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+  background: rgba(108,99,255,0.07);
+  transform: translateY(-3px);
+}
+
 /* ──────────────────────────────────────────────────
    ABOUT
 ────────────────────────────────────────────────── */
