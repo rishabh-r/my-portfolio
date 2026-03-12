@@ -582,7 +582,6 @@ export default function Chatbot() {
                       onKeyDown={handleKeyDown}
                       placeholder="Ask about experience, skills, projects…"
                       rows={1}
-                      disabled={loading}
                     />
                     <button className="chatbot-send" onClick={() => sendMessage()} disabled={!input.trim() || loading} aria-label="Send">➤</button>
                   </div>
