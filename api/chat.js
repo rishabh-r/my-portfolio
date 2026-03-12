@@ -109,7 +109,7 @@ export default async function handler(req, res) {
         { role: 'system', content: systemContent },
         ...messages.slice(-10),
       ],
-      max_tokens: voice ? 120 : 300,
+      max_tokens: voice ? 120 : 700,
       temperature: voice ? 0.85 : 0.7,
     })
 
