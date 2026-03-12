@@ -800,7 +800,7 @@ body {
 .achieve-emoji { font-size: 2.5rem; margin-bottom: 12px; display: block; }
 .achieve-num {
   font-family: var(--font-head);
-  font-size: 2.2rem;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
   font-weight: 800;
   background: linear-gradient(135deg, var(--purple), var(--pink));
   -webkit-background-clip: text;
@@ -916,4 +916,6 @@ body {
   .about-stats { grid-template-columns: 1fr 1fr; }
   .contact-cards { grid-template-columns: 1fr; }
   .achievements-grid { grid-template-columns: 1fr 1fr; }
+  .exp-header { flex-direction: column; gap: 6px; }
+  .exp-duration { align-self: flex-start; }
 }
